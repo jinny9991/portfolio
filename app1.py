@@ -1,5 +1,23 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Jinhee Park Portfolio Generator - Streamlit Web App
+포트폴리오를 생성하고 다운로드할 수 있는 Streamlit 웹 애플리케이션
+"""
+
+import streamlit as st
 import os
+import zipfile
+import io
 from datetime import datetime
+
+# 페이지 설정
+st.set_page_config(
+    page_title="Jinhee Park Portfolio Generator",
+    page_icon="💼",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 class PortfolioGenerator:
     def __init__(self):
@@ -577,8 +595,18 @@ class PortfolioGenerator:
             }
         ]
 
-    def generate_html(self):
+    def generate_html(self, name=None, email=None, phone=None, linkedin=None):
         """HTML 포트폴리오 생성"""
+        # 사용자 입력이 있으면 업데이트
+        if name:
+            self.portfolio_data['name'] = name
+        if email:
+            self.portfolio_data['contact']['email'] = email
+        if phone:
+            self.portfolio_data['contact']['phone'] = phone
+        if linkedin:
+            self.portfolio_data['contact']['linkedin'] = linkedin
+            
         timeline_data = self.get_timeline_data()
         career_data = self.get_career_data()
         certifications = self.get_certifications()
@@ -742,56 +770,177 @@ class PortfolioGenerator:
 </html>"""
         return html_content
 
-    def save_portfolio(self, filename='portfolio.html'):
-        """포트폴리오 HTML 파일 저장"""
-        html_content = self.generate_html()
-        
-        try:
-            with open(filename, 'w', encoding='utf-8') as f:
-                f.write(html_content)
-            print(f"✅ 포트폴리오가 성공적으로 생성되었습니다: {filename}")
-            print(f"📁 파일 위치: {os.path.abspath(filename)}")
-            return True
-        except Exception as e:
-            print(f"❌ 파일 생성 중 오류가 발생했습니다: {e}")
-            return False
 
-    def create_project_folder(self, folder_name='jinhee_portfolio'):
-        """프로젝트 폴더 생성 및 파일들 저장"""
-        try:
-            # 폴더 생성
-            if not os.path.exists(folder_name):
-                os.makedirs(folder_name)
-                print(f"📁 폴더 생성: {folder_name}")
-            
-            # HTML 파일 저장
-            html_path = os.path.join(folder_name, 'index.html')
-            if self.save_portfolio(html_path):
-                print(f"🌐 브라우저에서 확인: file://{os.path.abspath(html_path)}")
-                
-            return True
-        except Exception as e:
-            print(f"❌ 프로젝트 폴더 생성 중 오류: {e}")
-            return False
-
-
+# Streamlit 앱 메인 함수
 def main():
-    """메인 실행 함수"""
-    print("🚀 Jinhee Park 포트폴리오 생성기를 시작합니다...")
+    """Streamlit 메인 앱"""
+    st.title("💼 Jinhee Park Portfolio Generator")
+    st.markdown("### 브랜드 마케팅 포트폴리오를 생성하고 다운로드하세요!")
     
-    # 포트폴리오 생성기 인스턴스 생성
+    # 사이드바에서 사용자 정보 입력
+    st.sidebar.header("📝 개인 정보 설정")
+    
+    name = st.sidebar.text_input("이름", value="Jinhee Park")
+    email = st.sidebar.text_input("이메일", value="jinhee.park@email.com")
+    phone = st.sidebar.text_input("전화번호", value="+82-10-0000-0000")
+    linkedin = st.sidebar.text_input("LinkedIn URL", value="https://linkedin.com/in/jinhee-park")
+    
+    # 포트폴리오 생성기 인스턴스
     generator = PortfolioGenerator()
     
-    # 프로젝트 폴더 생성 및 파일 저장
-    if generator.create_project_folder():
-        print("\n🎉 포트폴리오 생성이 완료되었습니다!")
-        print("📖 사용법:")
-        print("   1. 생성된 index.html 파일을 브라우저에서 열기")
-        print("   2. 연락처 정보 수정 (line 15-19)")
-        print("   3. 프로젝트 데이터 추가/수정 (line 280-350)")
-        print("   4. GitHub Pages나 Netlify에 배포")
-    else:
-        print("❌ 포트폴리오 생성에 실패했습니다.")
+    # 메인 컨텐츠 영역
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        st.markdown("#### 🎯 기능 소개")
+        st.markdown("""
+        - ✅ **반응형 웹 포트폴리오** 자동 생성
+        - ✅ **모던한 디자인**과 애니메이션 효과
+        - ✅ **인터랙티브 네비게이션** 및 스크롤 효과
+        - ✅ **개인 정보 커스터마이징** 가능
+        - ✅ **즉시 다운로드** 및 배포 준비
+        """)
+        
+        # 미리보기 섹션
+        if st.button("📱 포트폴리오 미리보기", type="primary"):
+            st.markdown("#### 🔍 생성될 포트폴리오 미리보기")
+            
+            # 간단한 미리보기 표시
+            with st.expander("Hero 섹션 미리보기", expanded=True):
+                st.markdown(f"""
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                           color: white; padding: 40px; border-radius: 15px; text-align: center;">
+                    <h1 style="color: white; font-size: 2.5em; margin-bottom: 10px;">{name}</h1>
+                    <p style="font-size: 1.2em; opacity: 0.9;">"전략과 실행을 잇는 브랜드 Performer"</p>
+                    <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; margin-top: 20px;">
+                        <p><strong>글로벌 마케팅 | IMC 온오프라인 마케팅 | 디지털 마케팅 | 데이터 기반 브랜드전략가</strong></p>
+                        <p>6년 경력 | 국제 수상 3회 | 검색광고마케터 1급 | 데이터분석 준전문가</p>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with st.expander("연락처 정보 미리보기"):
+                st.markdown(f"""
+                📧 **이메일:** {email}  
+                📞 **전화번호:** {phone}  
+                💼 **LinkedIn:** {linkedin}
+                """)
+    
+    with col2:
+        st.markdown("#### 📊 포트폴리오 구성")
+        st.markdown("""
+        1. **Hero 섹션** - 개인 소개
+        2. **Overview** - 핵심 역량 소개
+        3. **Market Analysis** - 시장 분석 및 SWOT
+        4. **Projects** - 프로젝트 경험
+        5. **Contact** - 연락처 정보
+        """)
+        
+        # 통계 정보
+        st.markdown("#### 📈 포함된 콘텐츠")
+        st.metric("타임라인 항목", "10개")
+        st.metric("프로젝트 사례", "8개")
+        st.metric("SWOT 분석", "완료")
+    
+    # 포트폴리오 생성 및 다운로드
+    st.markdown("---")
+    st.markdown("#### 🚀 포트폴리오 생성 및 다운로드")
+    
+    if st.button("✨ 포트폴리오 생성하기", type="primary", use_container_width=True):
+        with st.spinner("포트폴리오를 생성하는 중..."):
+            # HTML 생성
+            html_content = generator.generate_html(
+                name=name,
+                email=email, 
+                phone=phone,
+                linkedin=linkedin
+            )
+            
+            # 생성 완료 메시지
+            st.success("🎉 포트폴리오가 성공적으로 생성되었습니다!")
+            
+            # 다운로드 버튼
+            st.download_button(
+                label="📥 HTML 파일 다운로드",
+                data=html_content,
+                file_name=f"{name.replace(' ', '_')}_portfolio.html",
+                mime="text/html",
+                use_container_width=True
+            )
+            
+            # ZIP 파일로도 제공
+            zip_buffer = io.BytesIO()
+            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                zip_file.writestr("index.html", html_content)
+                zip_file.writestr("README.md", f"""
+# {name} Portfolio
+
+이 포트폴리오는 Streamlit Portfolio Generator로 생성되었습니다.
+
+## 파일 구조
+- `index.html`: 메인 포트폴리오 파일
+
+## 사용법
+1. `index.html` 파일을 브라우저에서 열기
+2. GitHub Pages나 Netlify에 업로드하여 배포
+3. 필요에 따라 CSS/HTML 커스터마이징
+
+## 배포 방법
+### GitHub Pages
+1. GitHub 저장소 생성
+2. 파일 업로드
+3. Settings > Pages에서 배포 설정
+
+### Netlify
+1. 파일을 netlify.com에 드래그&드롭
+2. 자동 배포 완료
+
+Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                """)
+            
+            zip_buffer.seek(0)
+            
+            st.download_button(
+                label="📦 ZIP 파일로 다운로드 (배포용)",
+                data=zip_buffer.getvalue(),
+                file_name=f"{name.replace(' ', '_')}_portfolio.zip",
+                mime="application/zip",
+                use_container_width=True
+            )
+    
+    # 사용 가이드
+    st.markdown("---")
+    st.markdown("#### 📖 배포 가이드")
+    
+    tab1, tab2, tab3 = st.tabs(["GitHub Pages", "Netlify", "기타"])
+    
+    with tab1:
+        st.markdown("""
+        **GitHub Pages로 배포하기:**
+        1. GitHub에 새 저장소 생성
+        2. 다운로드한 HTML 파일을 `index.html`로 업로드
+        3. Settings > Pages > Source를 'Deploy from a branch' 선택
+        4. Branch를 'main'으로 설정
+        5. 몇 분 후 `https://username.github.io/repository-name`에서 확인
+        """)
+    
+    with tab2:
+        st.markdown("""
+        **Netlify로 배포하기:**
+        1. [netlify.com](https://netlify.com) 접속
+        2. 다운로드한 ZIP 파일을 드래그&드롭
+        3. 자동으로 배포 완료
+        4. 도메인 이름 커스터마이징 가능
+        """)
+    
+    with tab3:
+        st.markdown("""
+        **기타 호스팅 서비스:**
+        - **Vercel**: GitHub 연동으로 자동 배포
+        - **Firebase Hosting**: Google의 무료 호스팅
+        - **Surge.sh**: 명령어 한 줄로 배포
+        - **개인 서버**: FTP를 통한 업로드
+        """)
 
 
 if __name__ == "__main__":
