@@ -756,4 +756,50 @@ class PortfolioGenerator:
         try:
             with open(filename, 'w', encoding='utf-8') as f:
                 f.write(html_content)
-            print(f"✅ 포트폴리오가 성공적으로 생성되었습니다:
+            print(f"✅ 포트폴리오가 성공적으로 생성되었습니다: {filename}")
+            print(f"📁 파일 위치: {os.path.abspath(filename)}")
+            return True
+        except Exception as e:
+            print(f"❌ 파일 생성 중 오류가 발생했습니다: {e}")
+            return False
+
+    def create_project_folder(self, folder_name='jinhee_portfolio'):
+        """프로젝트 폴더 생성 및 파일들 저장"""
+        try:
+            # 폴더 생성
+            if not os.path.exists(folder_name):
+                os.makedirs(folder_name)
+                print(f"📁 폴더 생성: {folder_name}")
+            
+            # HTML 파일 저장
+            html_path = os.path.join(folder_name, 'index.html')
+            if self.save_portfolio(html_path):
+                print(f"🌐 브라우저에서 확인: file://{os.path.abspath(html_path)}")
+                
+            return True
+        except Exception as e:
+            print(f"❌ 프로젝트 폴더 생성 중 오류: {e}")
+            return False
+
+
+def main():
+    """메인 실행 함수"""
+    print("🚀 Jinhee Park 포트폴리오 생성기를 시작합니다...")
+    
+    # 포트폴리오 생성기 인스턴스 생성
+    generator = PortfolioGenerator()
+    
+    # 프로젝트 폴더 생성 및 파일 저장
+    if generator.create_project_folder():
+        print("\n🎉 포트폴리오 생성이 완료되었습니다!")
+        print("📖 사용법:")
+        print("   1. 생성된 index.html 파일을 브라우저에서 열기")
+        print("   2. 연락처 정보 수정 (line 15-19)")
+        print("   3. 프로젝트 데이터 추가/수정 (line 280-350)")
+        print("   4. GitHub Pages나 Netlify에 배포")
+    else:
+        print("❌ 포트폴리오 생성에 실패했습니다.")
+
+
+if __name__ == "__main__":
+    main()
