@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Jinhee Park Portfolio Generator
-HTML 포트폴리오를 생성하는 Python 스크립트
-"""
-
 import os
 from datetime import datetime
 
